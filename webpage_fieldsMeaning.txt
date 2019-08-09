@@ -1,0 +1,108 @@
+
+
+版本：
+
+     Nutch2.2.1
+
+
+id
+主键，根据网页url生成(格式：reversed domain name:protocol:port and path),因此，Nutch2只能保存当前网页的状态，而不能保存历史信息。
+
+headers
+标准的http headers ，其中包含非打印字符。Last-Modified　等信息可能于判断网页是否需要更新(仅需发一个head请求，而不是下载整个网页)
+
+text
+合并了解析出来的所有文本字段(utf-8)，用于普通的检索，不过现在检索一般使用solr，所以这个字段意义不大。
+
+status
+记录抓取状态
+[html] view plain copy
+
+    1     unfetched (links not yet fetched due to limits set in regex-urlfilter.txt, -TopN crawl parameters, etc.)  
+    2     fetched (page was successfully fetched)  
+    3     gone (that page no longer exists)  
+    4     redir_temp (temporary redirection — see reprUrl below for more details)  
+    5     redir_perm (permanent redirection — see reprUrl below for more details)  
+    34     retry  
+    38     not modified  
+
+
+markers
+各个任务的标记（如：dist***injmrk_***updmrk_***ftcmrk_***gnmrk_***prsmrk_**）
+
+parseStatus
+parse状态，在执行parseJob之前都是NULL。 ParseStatusCodes.html
+
+modifiedTime
+最后更改时间
+
+score
+网页重要程度(PR)，Nutch2.2.1 使用的是OPIC算法
+
+typ
+类型（如application/xhtml+xml）
+
+batchId
+批次ID，由generate生成( (curTime/1000) + "-" +randomSeed )， fetch时可选择特定batchId的任务
+
+baseUrl
+用于将网页源码中相对链接地址的转为绝对地址，通常就是当前网页的地址，有重定向的情况下，是最终定向到的地址
+
+content
+完整的网页源码，未经任何处理(字符集也没转)。　
+
+title
+title标签里的内容 (已转utf-8编码)
+
+reprUrl
+重定向url，将在下一轮抓取，不会立即跟入
+
+fetchInterval
+抓取间隔，默认是2592000(30天)
+
+prevFetchTime
+上次抓取时间
+
+inlinks
+入链(url:linktext)
+
+prevSignature
+上次更新时网页签名
+
+outlinks
+出链(url+linktext)
+
+fetchTime
+下次抓取时间，通常是间隔一个月
+
+retriesSinceFetch
+重试次数
+
+protocolStatus
+
+[html] view plain copy
+
+    ACCESS_DENIED 17  
+    BLOCKED 23  
+    EXCEPTION 16  
+    FAILED 2  
+    GONE 11  
+    MOVED 12  
+    NOTFETCHING 20  
+    NOTFOUND 14  
+    NOTMODIFIED 21  
+    PROTO_NOT_FOUND 10  
+    REDIR_EXCEEDED 19  
+    RETRY 15  
+    ROBOTS_DENIED 18  
+    SUCCESS 1  
+    TEMP_MOVED 13  
+    WOULDBLOCK 22  
+
+
+signature
+网页签名，用于判断网页是否改变，默认的实现是:org.apache.nutch.crawl.MD5Signature ，采用content的MD5值，另一个方案是org.apache.nutch.crawl.TextProfileSignature，content抽取文本、分词、排序等一系列操作后计算MD5值 TextProfileSignature
+
+metadata
+
+自定义元数据，可以在种子文件里面加，例如：　"http://xxxx/xxx.html \t type=news"

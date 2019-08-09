@@ -1,0 +1,421 @@
+
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mapreduce -- PageRank - 单行道| - 博客园</title>
+<link type="text/css" rel="stylesheet" href="/bundles/blog-common.css?v=-hy83QNg62d4qYibixJzxMJkbf1P9fTBlqv7SK5zVL01"/>
+<link id="MainCss" type="text/css" rel="stylesheet" href="/skins/clover/bundle-clover.css?v=ysbMD_tG88uRfQuhBDLbRjiNM_9XhcM_04JlSPFdU9w1"/>
+<link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/clover/bundle-clover-mobile.css?v=d9LctKHRIQp9rreugMcQ1-UJuq_j1fo0GZXTXj8Bqrk1"/>
+<link title="RSS" type="application/rss+xml" rel="alternate" href="http://www.cnblogs.com/one--way/rss"/>
+<link title="RSD" type="application/rsd+xml" rel="EditURI" href="http://www.cnblogs.com/one--way/rsd.xml"/>
+<link type="application/wlwmanifest+xml" rel="wlwmanifest" href="http://www.cnblogs.com/one--way/wlwmanifest.xml"/>
+<script src="//common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+<script type="text/javascript">var currentBlogApp = 'one--way', cb_enable_mathjax=false;var isLogined=false;</script>
+<script src="/bundles/blog-common.js?v=hrXhVUZRBrM1QWdCTm1D-5NdRKBmg-PqI2KBNh-fiD41" type="text/javascript"></script>
+</head>
+<body>
+<a name="top"></a>
+
+<!--done-->
+<TABLE cellpadding="0" cellspacing="0" border="0" align="center" width="100%">
+<TR>
+	<TD width=299 background="/skins/clover/images/banner1.jpg"></TD>
+	<TD background="/skins/clover/images/banner.jpg">
+<!--done-->
+<div class="header">
+	<div class="headerText">
+		<a id="Header1_HeaderTitle" class="headermaintitle" href="http://www.cnblogs.com/one--way/">One-Way</a><br>
+		爱一人，攀一山，追一梦
+	</div>
+</div>
+</TD>
+	<TD width=296 background="/skins/clover/images/banner2.jpg"></TD>
+</TR>
+</TABLE>
+<div id="mylinks"><a id="blog_nav_sitehome" class="menu" href="http://www.cnblogs.com/">博客园</a>&nbsp; &nbsp;
+<a id="blog_nav_myhome" class="menu" href="http://www.cnblogs.com/one--way/">首页</a>&nbsp; &nbsp;
+<a href="http://q.cnblogs.com/" class="menu" target="_blank">博问</a>&nbsp; &nbsp;
+<a href="http://home.cnblogs.com/ing/" class="menu" target="_blank">闪存</a>&nbsp; &nbsp;
+<a id="blog_nav_newpost" class="menu" rel="nofollow" href="https://i.cnblogs.com/EditPosts.aspx?opt=1">新随笔</a>&nbsp; &nbsp;
+<a id="blog_nav_rss" class="menu" href="http://www.cnblogs.com/one--way/rss">订阅</a>
+<a id="blog_nav_rss_image" href="http://www.cnblogs.com/one--way/rss"><img src="//www.cnblogs.com/images/xml.gif" alt="订阅" /></a>&nbsp; &nbsp;
+<a id="blog_nav_admin" class="menu" rel="nofollow" href="https://i.cnblogs.com/">管理</a>
+<!-- <a id="blog_nav_contact" accesskey="9" class="menu" rel="nofollow" href="https://msg.cnblogs.com/send/%E5%8D%95%E8%A1%8C%E9%81%93%7C">联系</a>&nbsp;&nbsp;&nbsp; -->
+</div>
+<div id="mytopmenu">
+	
+		<DIV id="mystats">
+			<div id="blog_stats">
+<!--done-->
+<div class="blogStats">
+posts - 112,&nbsp;
+comments - 8,&nbsp;
+trackbacks - 0
+
+</div></div></DIV>
+	
+</div>
+<div id="centercontent">
+	
+<div id="post_detail">
+<!--done-->
+<div class = "post">
+	<div class = "postTitle">
+		<a id="cb_post_title_url" class="postTitle2" href="https://www.cnblogs.com/one--way/p/5672207.html">Mapreduce -- PageRank</a>
+	</div>
+	<div id="cnblogs_post_body" class="blogpost-body"><p>PageRank 简单理解为网页排名，但是网页是根据什么排名的，接下来就简单介绍一下。</p>
+<p>&nbsp;</p>
+<p><strong>举例：</strong></p>
+<p>假设网页 A 的内容中有网页 B，C 和 D 的链接，并且&nbsp;A 的 PageRank的值为0.25。</p>
+<p>那接下里我们就可以计算在网页 A 中的其他网页的PageRank的值了。我们拿网页 B 来进行说明，</p>
+<p>在网页 A 中的网页&nbsp;B 的 PageRank 为 0.25 * (1/n) 其中n为网页 A 中网页链接数，结果则为 0.25*(1/3)。</p>
+<p>可以简单理解为A的PageRank被B，C 和 D 平分了，B分到了0.25的三分之一。</p>
+<p>然后将所有网页中的关于网页B的pagerank值求出来，就是网页B真实的pagerank了。</p>
+<p>&nbsp;</p>
+<p>但是上面的例子没有考虑到如下的特殊情况：</p>
+<p>1 网页A中只有指向自己的网页链接。</p>
+<p>2 网页A中没有任何链接。</p>
+<p>如果出现以上情况，会导致pagerank结果不准确。</p>
+<p>&nbsp;</p>
+<p>所以出现了下面的公式：</p>
+<p><strong>result = sum * n + (1-n)/N</strong></p>
+<p>sum 为上面计算出来的，如网页B在所有网页中的pagerank值的总和。</p>
+<p>n 可以理解为停留在当前网页继续进行网页跳转浏览的概率</p>
+<p>1-n 可以理解为不访问当前网页的任何链接，从浏览器的地址栏输入，转去其他网页的概率。</p>
+<p>N 为网页的数量</p>
+<p>&nbsp;</p>
+<p>下面介绍通过MapReduce实现PageRank</p>
+<p>简单的流程分析：</p>
+<p><strong>Map</strong></p>
+<p>取一行数据进行说明</p>
+<div class="cnblogs_code">
+<pre>A    B    C    D</pre>
+</div>
+<p>网页A中有网页B,C,D的链接;</p>
+<p>刚开始给网页A一个默认的pagerank值，然后根据这个值计算其他网页链接在网页A中的PageRank。处理后的数据如下：</p>
+<div class="cnblogs_code">
+<pre>A    <span style="color: #800080;">0.25</span><span style="color: #000000;">    B    C    D
+B    </span><span style="color: #800080;">0.25</span>*(<span style="color: #800080;">1</span>/<span style="color: #800080;">3</span><span style="color: #000000;">)
+C    </span><span style="color: #800080;">0.25</span>*(<span style="color: #800080;">1</span>/<span style="color: #800080;">3</span><span style="color: #000000;">)
+D    </span><span style="color: #800080;">0.25</span>*(<span style="color: #800080;">1</span>/<span style="color: #800080;">3</span>)</pre>
+</div>
+<p>&nbsp;</p>
+<p><strong>Reduce</strong></p>
+<p>然后通过 Reduce 计算出各个网页在其他网页中的 PageRank 的总和 sum，然后代入公式计算实际的PageRank，并更新 A 0.25 B C D 中的数据，这里将0.25更新为计算出来真实的 PageRank。</p>
+<p>重复计算各个网页的 PageRank 的值，直到 PageRank 的结果收敛，值趋于稳定。</p>
+<div class="cnblogs_code">
+<pre>A    <span style="color: #800080;">0.25</span>    B    C    D  <span style="color: #ff0000;">=&gt;</span>A    ?    B    C    D</pre>
+</div>
+<p>&nbsp;</p>
+<p>测试数据：</p>
+<div class="cnblogs_code">
+<pre><span style="color: #000000;">A    B       C       D
+B    A       D
+C    C
+D    B       C</span></pre>
+</div>
+<p>&nbsp;</p>
+<p>测试代码：</p>
+<p>RunJob.java</p>
+<div class="cnblogs_code">
+<pre><span style="color: #008080;">  1</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.conf.Configuration;
+</span><span style="color: #008080;">  2</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.fs.FileSystem;
+</span><span style="color: #008080;">  3</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.fs.Path;
+</span><span style="color: #008080;">  4</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.io.Text;
+</span><span style="color: #008080;">  5</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.Job;
+</span><span style="color: #008080;">  6</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.Mapper;
+</span><span style="color: #008080;">  7</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.Reducer;
+</span><span style="color: #008080;">  8</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+</span><span style="color: #008080;">  9</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.lib.input.KeyValueTextInputFormat;
+</span><span style="color: #008080;"> 10</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+</span><span style="color: #008080;"> 11</span> 
+<span style="color: #008080;"> 12</span> <span style="color: #0000ff;">import</span><span style="color: #000000;"> java.io.IOException;
+</span><span style="color: #008080;"> 13</span> 
+<span style="color: #008080;"> 14</span> <span style="color: #008000;">/**</span>
+<span style="color: #008080;"> 15</span> <span style="color: #008000;"> * Created by Edward on 2016/7/13.
+</span><span style="color: #008080;"> 16</span>  <span style="color: #008000;">*/</span>
+<span style="color: #008080;"> 17</span> <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> RunJob {
+</span><span style="color: #008080;"> 18</span> 
+<span style="color: #008080;"> 19</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">enum</span><span style="color: #000000;"> ValueEnum{
+</span><span style="color: #008080;"> 20</span> <span style="color: #000000;">        CLOSURE_VALUE;
+</span><span style="color: #008080;"> 21</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;"> 22</span> 
+<span style="color: #008080;"> 23</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> main(String[] args)
+</span><span style="color: #008080;"> 24</span> <span style="color: #000000;">    {
+</span><span style="color: #008080;"> 25</span> 
+<span style="color: #008080;"> 26</span>         <span style="color: #008000;">//</span><span style="color: #008000;">access hdfs's user</span>
+<span style="color: #008080;"> 27</span>         System.setProperty("HADOOP_USER_NAME","root"<span style="color: #000000;">);
+</span><span style="color: #008080;"> 28</span> 
+<span style="color: #008080;"> 29</span>         Configuration conf = <span style="color: #0000ff;">new</span><span style="color: #000000;"> Configuration();
+</span><span style="color: #008080;"> 30</span>         conf.set("fs.defaultFS", "hdfs://node1:8020"<span style="color: #000000;">);
+</span><span style="color: #008080;"> 31</span> 
+<span style="color: #008080;"> 32</span>         <span style="color: #0000ff;">try</span><span style="color: #000000;"> {
+</span><span style="color: #008080;"> 33</span>             <span style="color: #0000ff;">int</span> i = 0<span style="color: #000000;">;
+</span><span style="color: #008080;"> 34</span>             <span style="color: #0000ff;">while</span>(<span style="color: #0000ff;">true</span><span style="color: #000000;">) {
+</span><span style="color: #008080;"> 35</span>                 i++<span style="color: #000000;">;
+</span><span style="color: #008080;"> 36</span>                 conf.setInt("count"<span style="color: #000000;">, i);
+</span><span style="color: #008080;"> 37</span> 
+<span style="color: #008080;"> 38</span>                 FileSystem fs =<span style="color: #000000;"> FileSystem.get(conf);
+</span><span style="color: #008080;"> 39</span>                 Job job =<span style="color: #000000;"> Job.getInstance(conf);
+</span><span style="color: #008080;"> 40</span>                 job.setJarByClass(RunJob.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 41</span>                 job.setMapperClass(MyMapper.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 42</span>                 job.setReducerClass(MyReducer.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 43</span> 
+<span style="color: #008080;"> 44</span>                 <span style="color: #008000;">//</span><span style="color: #008000;">需要指定 map out 的 key 和 value</span>
+<span style="color: #008080;"> 45</span>                 job.setOutputKeyClass(Text.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 46</span>                 job.setOutputValueClass(Text.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 47</span> 
+<span style="color: #008080;"> 48</span>                 <span style="color: #008000;">//</span><span style="color: #008000;">设置输入类的</span>
+<span style="color: #008080;"> 49</span>                 job.setInputFormatClass(KeyValueTextInputFormat.<span style="color: #0000ff;">class</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 50</span>                 <span style="color: #0000ff;">if</span>(i==1<span style="color: #000000;">)
+</span><span style="color: #008080;"> 51</span>                     FileInputFormat.addInputPath(job, <span style="color: #0000ff;">new</span> Path("/test/pagerank/input"<span style="color: #000000;">));
+</span><span style="color: #008080;"> 52</span>                 <span style="color: #0000ff;">else</span>
+<span style="color: #008080;"> 53</span>                     FileInputFormat.addInputPath(job, <span style="color: #0000ff;">new</span> Path("/test/pagerank/output/pr"+(i-1<span style="color: #000000;">)));
+</span><span style="color: #008080;"> 54</span> 
+<span style="color: #008080;"> 55</span>                 Path path = <span style="color: #0000ff;">new</span> Path("/test/pagerank/output/pr"+<span style="color: #000000;">i);
+</span><span style="color: #008080;"> 56</span>                 <span style="color: #0000ff;">if</span> (fs.exists(path))<span style="color: #008000;">//</span><span style="color: #008000;">如果目录存在，则删除目录</span>
+<span style="color: #008080;"> 57</span> <span style="color: #000000;">                {
+</span><span style="color: #008080;"> 58</span>                     fs.delete(path, <span style="color: #0000ff;">true</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 59</span> <span style="color: #000000;">                }
+</span><span style="color: #008080;"> 60</span> <span style="color: #000000;">                FileOutputFormat.setOutputPath(job, path);
+</span><span style="color: #008080;"> 61</span> 
+<span style="color: #008080;"> 62</span>                 <span style="color: #0000ff;">boolean</span> b = job.waitForCompletion(<span style="color: #0000ff;">true</span><span style="color: #000000;">);
+</span><span style="color: #008080;"> 63</span>                 <span style="color: #0000ff;">if</span><span style="color: #000000;"> (b) {
+</span><span style="color: #008080;"> 64</span>                     <span style="color: #0000ff;">long</span> closure =<span style="color: #000000;">job.getCounters().findCounter(ValueEnum.CLOSURE_VALUE).getValue();
+</span><span style="color: #008080;"> 65</span>                     <span style="color: #0000ff;">double</span> avg= closure/4000.0;<span style="color: #008000;">//</span><span style="color: #008000;">计算收敛的平均值，浮动小于0.001则认为收敛</span>
+<span style="color: #008080;"> 66</span>                     System.out.println("执行第"+i+"次, closure="+closure+",avg="+<span style="color: #000000;">avg);
+</span><span style="color: #008080;"> 67</span>                     <span style="color: #0000ff;">if</span>(avg &lt; 0.001<span style="color: #000000;">){
+</span><span style="color: #008080;"> 68</span>                         System.out.println("总共执行了"+i+"次，之后收敛"<span style="color: #000000;">);
+</span><span style="color: #008080;"> 69</span>                         <span style="color: #0000ff;">break</span><span style="color: #000000;">;
+</span><span style="color: #008080;"> 70</span> <span style="color: #000000;">                    }
+</span><span style="color: #008080;"> 71</span> <span style="color: #000000;">                }
+</span><span style="color: #008080;"> 72</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;"> 73</span> 
+<span style="color: #008080;"> 74</span>         } <span style="color: #0000ff;">catch</span><span style="color: #000000;"> (Exception e) {
+</span><span style="color: #008080;"> 75</span> <span style="color: #000000;">            e.printStackTrace();
+</span><span style="color: #008080;"> 76</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;"> 77</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;"> 78</span> 
+<span style="color: #008080;"> 79</span> 
+<span style="color: #008080;"> 80</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">class</span> MyMapper <span style="color: #0000ff;">extends</span> Mapper&lt;Text, Text, Text, Text&gt;<span style="color: #000000;"> {
+</span><span style="color: #008080;"> 81</span> <span style="color: #000000;">        @Override
+</span><span style="color: #008080;"> 82</span>         <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">void</span> map(Text key, Text value, Context context) <span style="color: #0000ff;">throws</span><span style="color: #000000;"> IOException, InterruptedException {
+</span><span style="color: #008080;"> 83</span>             AdjacentNodes adjacentNodes  = <span style="color: #0000ff;">new</span><span style="color: #000000;"> AdjacentNodes();
+</span><span style="color: #008080;"> 84</span>             <span style="color: #0000ff;">int</span> count = context.getConfiguration().getInt("count", 1<span style="color: #000000;">);
+</span><span style="color: #008080;"> 85</span> 
+<span style="color: #008080;"> 86</span>             <span style="color: #0000ff;">if</span>(count == 1<span style="color: #000000;">)
+</span><span style="color: #008080;"> 87</span> <span style="color: #000000;">            {
+</span><span style="color: #008080;"> 88</span>                 AdjacentNodes firstAdj = <span style="color: #0000ff;">new</span><span style="color: #000000;"> AdjacentNodes();
+</span><span style="color: #008080;"> 89</span>                 firstAdj.setValue(1.0<span style="color: #000000;">);
+</span><span style="color: #008080;"> 90</span>                 firstAdj.setNodes(value.toString().split("\t"<span style="color: #000000;">));
+</span><span style="color: #008080;"> 91</span>                 adjacentNodes =<span style="color: #000000;"> firstAdj;
+</span><span style="color: #008080;"> 92</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;"> 93</span>             <span style="color: #0000ff;">else</span>
+<span style="color: #008080;"> 94</span> <span style="color: #000000;">            {
+</span><span style="color: #008080;"> 95</span>                 <span style="color: #008000;">//</span><span style="color: #008000;">格式化 value: 1.0 B C D</span>
+<span style="color: #008080;"> 96</span> <span style="color: #000000;">                adjacentNodes.formatInfo(value.toString());
+</span><span style="color: #008080;"> 97</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;"> 98</span>             <span style="color: #008000;">//</span><span style="color: #008000;">A 1.0 B C D</span>
+<span style="color: #008080;"> 99</span>             context.write(key, <span style="color: #0000ff;">new</span><span style="color: #000000;"> Text(adjacentNodes.toString()));
+</span><span style="color: #008080;">100</span> 
+<span style="color: #008080;">101</span>             <span style="color: #0000ff;">double</span> pagerank = adjacentNodes.getValue()/<span style="color: #000000;">adjacentNodes.getNum();
+</span><span style="color: #008080;">102</span>             <span style="color: #0000ff;">for</span>(<span style="color: #0000ff;">int</span> i=0; i&lt;adjacentNodes.getNum(); i++<span style="color: #000000;">)
+</span><span style="color: #008080;">103</span> <span style="color: #000000;">            {
+</span><span style="color: #008080;">104</span>                 String node =<span style="color: #000000;"> adjacentNodes.getNodes()[i];
+</span><span style="color: #008080;">105</span>                 <span style="color: #008000;">//</span><span style="color: #008000;">B 0.333</span>
+<span style="color: #008080;">106</span>                 context.write(<span style="color: #0000ff;">new</span> Text(node), <span style="color: #0000ff;">new</span> Text(pagerank+""<span style="color: #000000;">));
+</span><span style="color: #008080;">107</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">108</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">109</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">110</span> 
+<span style="color: #008080;">111</span>     <span style="color: #0000ff;">public</span> <span style="color: #0000ff;">static</span> <span style="color: #0000ff;">class</span> MyReducer <span style="color: #0000ff;">extends</span> Reducer&lt;Text, Text, Text, Text&gt;<span style="color: #000000;"> {
+</span><span style="color: #008080;">112</span> <span style="color: #000000;">        @Override
+</span><span style="color: #008080;">113</span>         <span style="color: #0000ff;">protected</span> <span style="color: #0000ff;">void</span> reduce(Text key, Iterable&lt;Text&gt; values, Context context) <span style="color: #0000ff;">throws</span><span style="color: #000000;"> IOException, InterruptedException {
+</span><span style="color: #008080;">114</span> 
+<span style="color: #008080;">115</span>             AdjacentNodes adjacentNodes = <span style="color: #0000ff;">new</span><span style="color: #000000;"> AdjacentNodes();
+</span><span style="color: #008080;">116</span> 
+<span style="color: #008080;">117</span>             Double sum = 0.0<span style="color: #000000;">;
+</span><span style="color: #008080;">118</span>             <span style="color: #0000ff;">for</span><span style="color: #000000;">(Text adj : values)
+</span><span style="color: #008080;">119</span> <span style="color: #000000;">            {
+</span><span style="color: #008080;">120</span>                 String str =<span style="color: #000000;"> adj.toString();
+</span><span style="color: #008080;">121</span>                 <span style="color: #0000ff;">if</span>(str.split("\t").length&gt;1<span style="color: #000000;">)
+</span><span style="color: #008080;">122</span> <span style="color: #000000;">                {
+</span><span style="color: #008080;">123</span> <span style="color: #000000;">                    adjacentNodes.formatInfo(str);
+</span><span style="color: #008080;">124</span> <span style="color: #000000;">                }
+</span><span style="color: #008080;">125</span>                 <span style="color: #0000ff;">else</span><span style="color: #000000;">{
+</span><span style="color: #008080;">126</span>                     sum += Double.parseDouble(str);   <span style="color: #008000;">//</span><span style="color: #008000;">对节点的 pagerank 求和，</span>
+<span style="color: #008080;">127</span> <span style="color: #000000;">                }
+</span><span style="color: #008080;">128</span> <span style="color: #000000;">            }
+</span><span style="color: #008080;">129</span> 
+<span style="color: #008080;">130</span>             <span style="color: #008000;">//</span><span style="color: #008000;">计算pagerank</span>
+<span style="color: #008080;">131</span>             <span style="color: #0000ff;">double</span> n = 0.80<span style="color: #000000;">;
+</span><span style="color: #008080;">132</span>             <span style="color: #0000ff;">double</span> pagerank = sum * n + (1-n)/4.0;<span style="color: #008000;">//</span><span style="color: #008000;"> 计算pagerank 公式 sum * n + (1-n)/N
+</span><span style="color: #008080;">133</span> 
+<span style="color: #008080;">134</span>             <span style="color: #008000;">//</span><span style="color: #008000;">计算收敛的差值</span>
+<span style="color: #008080;">135</span>             <span style="color: #0000ff;">int</span> closure =(<span style="color: #0000ff;">int</span>)(Math.abs(pagerank - adjacentNodes.getValue()) * 1000<span style="color: #000000;">);
+</span><span style="color: #008080;">136</span>             <span style="color: #008000;">//</span><span style="color: #008000;">通过context.getCounter(ENUM)方法，每次执行reduce将closure的值进行累加，结果传递给主函数，</span>
+<span style="color: #008080;">137</span> 
+<span style="color: #008080;">138</span> <span style="color: #000000;">            context.getCounter(ValueEnum.CLOSURE_VALUE).increment(closure);
+</span><span style="color: #008080;">139</span> 
+<span style="color: #008080;">140</span> <span style="color: #000000;">            adjacentNodes.setValue(pagerank);
+</span><span style="color: #008080;">141</span>             context.write(key, <span style="color: #0000ff;">new</span><span style="color: #000000;"> Text(adjacentNodes.toString()));
+</span><span style="color: #008080;">142</span> <span style="color: #000000;">        }
+</span><span style="color: #008080;">143</span> <span style="color: #000000;">    }
+</span><span style="color: #008080;">144</span> }</pre>
+</div>
+<pre></pre>
+<pre>AdjacentNodes.java</pre>
+<div class="cnblogs_code">
+<pre><span style="color: #008000;">/**</span><span style="color: #008000;">
+ * Created by Edward on 2016/7/14.
+ </span><span style="color: #008000;">*/</span>
+<span style="color: #0000ff;">public</span> <span style="color: #0000ff;">class</span><span style="color: #000000;"> AdjacentNodes {
+
+    </span><span style="color: #0000ff;">double</span> value = 0.0<span style="color: #000000;">;
+    </span><span style="color: #0000ff;">int</span> num = 0<span style="color: #000000;">;
+    String[] nodes </span>= <span style="color: #0000ff;">null</span><span style="color: #000000;">;
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> formatInfo(String str)
+    {
+        String[] val </span>= str.split("\t"<span style="color: #000000;">);
+        </span><span style="color: #0000ff;">this</span>.setValue(Double.parseDouble(val[0<span style="color: #000000;">]));
+        </span><span style="color: #0000ff;">this</span>.setNum(val.length-1<span style="color: #000000;">);
+
+        </span><span style="color: #0000ff;">if</span>(<span style="color: #0000ff;">this</span>.num != 0<span style="color: #000000;">)
+            </span><span style="color: #0000ff;">this</span>.nodes = <span style="color: #0000ff;">new</span> String[<span style="color: #0000ff;">this</span><span style="color: #000000;">.num];
+
+        </span><span style="color: #0000ff;">for</span>(<span style="color: #0000ff;">int</span> i=1; i&lt;val.length; i++<span style="color: #000000;">)
+        {
+            </span><span style="color: #0000ff;">this</span>.nodes[i-1] =<span style="color: #000000;"> val[i];
+        }
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">boolean</span><span style="color: #000000;"> isEmpty()
+    {
+        </span><span style="color: #0000ff;">if</span>(<span style="color: #0000ff;">this</span>.num == 0<span style="color: #000000;">)
+            </span><span style="color: #0000ff;">return</span> <span style="color: #0000ff;">true</span><span style="color: #000000;">;
+        </span><span style="color: #0000ff;">else</span>
+            <span style="color: #0000ff;">return</span> <span style="color: #0000ff;">false</span><span style="color: #000000;">;
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span><span style="color: #000000;"> setNodes(String[] nodes) {
+        </span><span style="color: #0000ff;">this</span>.nodes =<span style="color: #000000;"> nodes;
+        </span><span style="color: #0000ff;">this</span>.num =<span style="color: #000000;"> nodes.length;
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> setNum(<span style="color: #0000ff;">int</span><span style="color: #000000;"> num) {
+        </span><span style="color: #0000ff;">this</span>.num =<span style="color: #000000;"> num;
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">void</span> setValue(<span style="color: #0000ff;">double</span><span style="color: #000000;"> value) {
+        </span><span style="color: #0000ff;">this</span>.value =<span style="color: #000000;"> value;
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">double</span><span style="color: #000000;"> getValue() {
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> value;
+    }
+
+    </span><span style="color: #0000ff;">public</span> <span style="color: #0000ff;">int</span><span style="color: #000000;"> getNum() {
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> num;
+    }
+
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> String[] getNodes() {
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> nodes;
+    }
+
+
+    @Override
+    </span><span style="color: #0000ff;">public</span><span style="color: #000000;"> String toString() {
+
+        StringBuffer stringBuffer </span>= <span style="color: #0000ff;">new</span> StringBuffer(<span style="color: #0000ff;">this</span>.value+""<span style="color: #000000;">);
+
+        </span><span style="color: #0000ff;">for</span>(<span style="color: #0000ff;">int</span> i=0; i&lt;<span style="color: #0000ff;">this</span>.num; i++<span style="color: #000000;">)
+        {
+            stringBuffer.append(</span>"\t"+<span style="color: #0000ff;">this</span><span style="color: #000000;">.nodes[i]);
+        }
+
+        </span><span style="color: #0000ff;">return</span><span style="color: #000000;"> stringBuffer.toString();
+    }
+}</span></pre>
+</div>
+<p>&nbsp;</p>
+<p>结果数据：</p>
+<div class="cnblogs_code">
+<pre>A       <span style="color: #800080;">0.10135294176208584</span><span style="color: #000000;">     B       C       D
+B       </span><span style="color: #800080;">0.12838069628609527</span><span style="color: #000000;">     A       D
+C       </span><span style="color: #800080;">0.6560527651143326</span><span style="color: #000000;">      C
+D       </span><span style="color: #800080;">0.12838069628609527</span>     B       C</pre>
+</div>
+<p>总共执行了24次，之后收敛;</p>
+<p>PageRank值越高，越值得推荐。</p>
+<p>&nbsp;</p></div><div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+<div id="BlogPostCategory"></div>
+<div id="EntryTag"></div>
+<div id="blog_post_info">
+</div>
+<div class="clear"></div>
+<div id="post_next_prev"></div>
+</div>
+
+
+	<div class = "postDesc">posted on <span id="post-date">2016-07-15 01:08</span> <a href='http://www.cnblogs.com/one--way/'>单行道|</a> 阅读(<span id="post_view_count">...</span>) 评论(<span id="post_comment_count">...</span>)  <a href ="https://i.cnblogs.com/EditPosts.aspx?postid=5672207" rel="nofollow">编辑</a> <a href="#" onclick="AddToWz(5672207);return false;">收藏</a></div>
+</div>
+<script type="text/javascript">var allowComments=true,cb_blogId=291899,cb_entryId=5672207,cb_blogApp=currentBlogApp,cb_blogUserGuid='ca8bf27c-9a3d-e611-9fc1-ac853d9f53cc',cb_entryCreatedDate='2016/7/15 1:08:00';loadViewCount(cb_entryId);var cb_postType=1;</script>
+
+</div><a name="!comments"></a><div id="blog-comments-placeholder"></div><script type="text/javascript">var commentManager = new blogCommentManager();commentManager.renderComments(0);</script>
+<div id='comment_form' class='commentform'>
+<a name='commentform'></a>
+<div id='divCommentShow'></div>
+<div id='comment_nav'><span id='span_refresh_tips'></span><a href='javascript:void(0);' onclick='return RefreshCommentList();' id='lnk_RefreshComments' runat='server' clientidmode='Static'>刷新评论</a><a href='#' onclick='return RefreshPage();'>刷新页面</a><a href='#top'>返回顶部</a></div>
+<div id='comment_form_container'></div>
+<div class='ad_text_commentbox' id='ad_text_under_commentbox'></div>
+<div id='ad_t2'></div>
+<div id='opt_under_post'></div>
+<div id='cnblogs_c1' class='c_ad_block'></div>
+<div id='under_post_news'></div>
+<div id='cnblogs_c2' class='c_ad_block'></div>
+<div id='under_post_kb'></div>
+<div id='HistoryToday' class='c_ad_block'></div>
+<script type='text/javascript'>
+    fixPostBody();
+    setTimeout(function () { incrementViewCount(cb_entryId); }, 50);
+    deliverAdT2();
+    deliverAdC1();
+    deliverAdC2();    
+    loadNewsAndKb();
+    loadBlogSignature();
+    LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+    GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+    loadOptUnderPost();
+    GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);   
+</script>
+</div>
+
+
+</div>
+<div id="leftcontent">
+	
+		<DIV id="leftcontentcontainer" >
+			
+<!--done-->
+<div class="newsItem">
+	<div id="blog-news"></div><script type="text/javascript">loadBlogNews();</script>
+</div>
+<br>			
+			<div id="blog-calendar" style="display:none"></div><script type="text/javascript">loadBlogDefaultCalendar();</script>
+			<div id="blog-sidecolumn"></div><script type="text/javascript">loadBlogSideColumn();</script></DIV>
+	
+</div>
+
+
+<!--done-->
+<div class="footer">
+	
+	Copyright &copy;2018 单行道| Powered By<a href="/">博客园</a> 模板提供：<a href="http://blog.hjenglish.com">沪江博客</a>
+</div>
+</body>
+</html>
